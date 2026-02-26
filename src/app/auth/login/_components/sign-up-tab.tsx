@@ -25,8 +25,11 @@ const signUpSchema = z.object({
 
 type SignUpForm = z.infer<typeof signUpSchema>;
 
-const SignUpTab = () => {
-  const router = useRouter();
+const SignUpTab = ({
+  openEmailVerificationTab,
+}: {
+  openEmailVerificationTab: (email: string) => void;
+}) => {
   const form = useForm<SignUpForm>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
@@ -39,17 +42,18 @@ const SignUpTab = () => {
   const { isSubmitting } = form.formState;
 
   async function handleSignUp(data: SignUpForm) {
-    await authClient.signUp.email(
+    const res = await authClient.signUp.email(
       { ...data, callbackURL: "/" },
       {
         onError: (error) => {
-          toast.error(error.error.message || "Failed to sign in");
-        },
-        onSuccess: () => {
-          router.push("/");
+          toast.error(error.error.message || "Failed to sign up");
         },
       },
     );
+
+    if (res.error === null && !res.data.user.emailVerified) {
+      openEmailVerificationTab(data.email);
+    }
   }
   return (
     <Form {...form}>
@@ -94,7 +98,7 @@ const SignUpTab = () => {
           )}
         />
         <Button type="submit" disabled={isSubmitting} className="w-full">
-          <LoadingSwap isLoading={isSubmitting}>Sign In</LoadingSwap>
+          <LoadingSwap isLoading={isSubmitting}>Sign Up</LoadingSwap>
         </Button>
       </form>
     </Form>
