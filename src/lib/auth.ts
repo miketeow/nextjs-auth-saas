@@ -5,6 +5,19 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 
 export const auth = betterAuth({
+  user: {
+    changeEmail: {
+      enabled: true,
+      sendChangeEmailConfirmation: async ({ user, url, newEmail }) => {
+        console.log("--------------------------------");
+        console.log(`[DEV MOCK] Send New Email Confirmation`);
+        console.log(`To: ${user.email}`);
+        console.log(`Link: ${url}`);
+        console.log(`New Email: ${newEmail}`);
+        console.log("--------------------------------");
+      },
+    },
+  },
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,

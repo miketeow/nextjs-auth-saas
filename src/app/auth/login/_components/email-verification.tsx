@@ -1,29 +1,18 @@
-"use client";
 import { Button } from "@/components/ui/button";
+import { useCountdown } from "@/hooks/use-countdown";
 import { authClient } from "@/lib/auth-client";
-import { useEffect, useRef, useState } from "react";
 
 const EmailVerification = ({ email }: { email: string }) => {
-  const [timeToNextResend, setTimeToNextResend] = useState(30);
-  const interval = useRef<NodeJS.Timeout>(undefined);
+  const { timeLeft, startTimer } = useCountdown("resend-email-timer");
 
-  useEffect(() => {
-    startEmailVerificationCountdown();
-  }, []);
+  const handleResend = async () => {
+    startTimer(30);
+    await authClient.sendVerificationEmail({
+      email,
+      callbackURL: "/",
+    });
+  };
 
-  function startEmailVerificationCountdown(time = 30) {
-    setTimeToNextResend(time);
-    interval.current = setInterval(() => {
-      setTimeToNextResend((t) => {
-        const newT = t - 1;
-        if (newT <= 0) {
-          clearInterval(interval.current);
-          return 0;
-        }
-        return newT;
-      });
-    }, 1000);
-  }
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground mt-2">
@@ -34,18 +23,10 @@ const EmailVerification = ({ email }: { email: string }) => {
       <Button
         variant="outline"
         className="w-full"
-        disabled={timeToNextResend > 0}
-        onClick={() => {
-          startEmailVerificationCountdown();
-          return authClient.sendVerificationEmail({
-            email,
-            callbackURL: "/",
-          });
-        }}
+        onClick={handleResend}
+        disabled={timeLeft > 0}
       >
-        {timeToNextResend > 0
-          ? `Resend Email (${timeToNextResend})`
-          : "Resend Email"}
+        {timeLeft > 0 ? `Resend Email (${timeLeft}s)` : `Resend Email`}
       </Button>
     </div>
   );

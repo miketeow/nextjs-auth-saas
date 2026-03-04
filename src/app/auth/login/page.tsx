@@ -11,17 +11,22 @@ import SignUpTab from "./_components/sign-up-tab";
 import SignInTab from "./_components/sign-in-tab";
 import { Separator } from "@/components/ui/separator";
 import SocialAuthButtons from "./_components/social-auth-buttons";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import EmailVerification from "./_components/email-verification";
 import ForgotPassword from "./_components/forgot-password";
 
 type Tab = "signin" | "signup" | "email-verification" | "forgot-password";
-const LoginPage = () => {
+function LoginClient() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [selectedTab, setSelectedTab] = useState<Tab>("signin");
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Read state directly from url params
+
+  const selectedTab = (searchParams.get("tab") as Tab) || "signin";
+  const currentEmail = searchParams.get("email") || "";
 
   useEffect(() => {
     authClient.getSession().then((session) => {
@@ -29,14 +34,24 @@ const LoginPage = () => {
     });
   }, [router]);
 
-  function openEmailVerificationTab(email: string) {
-    setEmail(email);
-    setSelectedTab("email-verification");
-  }
+  // Universal URL Updater
+  const handleTabChange = (newTab: string, userEmail?: string) => {
+    // Clone current params to acoid overwrite unrelated query params
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", newTab);
+
+    if (userEmail) {
+      params.set("email", userEmail);
+    }
+
+    // Use router replace so that user's back button don't get broken by tab's click
+    router.replace(`${pathname}?${params.toString()}`);
+  };
+
   return (
     <Tabs
       value={selectedTab}
-      onValueChange={(t) => setSelectedTab(t as Tab)}
+      onValueChange={(t) => handleTabChange(t as Tab)}
       className="mx-auto w-full my-6 px-4"
     >
       {(selectedTab === "signin" || selectedTab === "signup") && (
@@ -53,8 +68,10 @@ const LoginPage = () => {
           </CardHeader>
           <CardContent>
             <SignInTab
-              openEmailVerificationTab={openEmailVerificationTab}
-              openForgotPassword={() => setSelectedTab("forgot-password")}
+              openEmailVerificationTab={(email) =>
+                handleTabChange("email-verification", email)
+              }
+              openForgotPassword={() => handleTabChange("forgot-password")}
             />
           </CardContent>
 
@@ -72,7 +89,11 @@ const LoginPage = () => {
             <CardTitle>Sign Up</CardTitle>
           </CardHeader>
           <CardContent>
-            <SignUpTab openEmailVerificationTab={openEmailVerificationTab} />
+            <SignUpTab
+              openEmailVerificationTab={(email) =>
+                handleTabChange("email-verification", email)
+              }
+            />
           </CardContent>
           <Separator />
 
@@ -88,7 +109,7 @@ const LoginPage = () => {
             <CardTitle>Verify Your Email</CardTitle>
           </CardHeader>
           <CardContent>
-            <EmailVerification email={email} />
+            <EmailVerification email={currentEmail} />
           </CardContent>
         </Card>
       </TabsContent>
@@ -99,12 +120,21 @@ const LoginPage = () => {
             <CardTitle>Forgot Password</CardTitle>
           </CardHeader>
           <CardContent>
-            <ForgotPassword openSignInTab={() => setSelectedTab("signin")} />
+            <ForgotPassword openSignInTab={() => handleTabChange("signin")} />
           </CardContent>
         </Card>
       </TabsContent>
     </Tabs>
   );
-};
+}
 
-export default LoginPage;
+// Suspense boundary
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={<div className="flex justify-center mt-10">Loading...</div>}
+    >
+      <LoginClient />
+    </Suspense>
+  );
+}
