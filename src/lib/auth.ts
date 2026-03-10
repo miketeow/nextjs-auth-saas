@@ -17,6 +17,16 @@ export const auth = betterAuth({
         console.log("--------------------------------");
       },
     },
+    deleteUser: {
+      enabled: true,
+      sendDeleteAccountVerification: async ({ user, url }) => {
+        console.log("--------------------------------");
+        console.log(`[DEV MOCK] Send Delete Account Verification`);
+        console.log(`To: ${user.email}`);
+        console.log(`Link: ${url}`);
+        console.log("--------------------------------");
+      },
+    },
   },
   account: {
     accountLinking: {

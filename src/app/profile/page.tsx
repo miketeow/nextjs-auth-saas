@@ -26,6 +26,7 @@ import SetPasswordButton from "./_components/set-password-button";
 import ChangePasswordTab from "./_components/change-password-form";
 import SessionsManagement from "./_components/sessions-management";
 import AccountLinking from "./_components/account-linking";
+import AccountDeletion from "./_components/account-deletion";
 
 const ProfilePage = async () => {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -83,7 +84,7 @@ const ProfilePage = async () => {
             <LinkIcon />
             <span className="max-sm:hidden">Accounts</span>
           </TabsTrigger>
-          <TabsTrigger value="Danger">
+          <TabsTrigger value="danger">
             <User />
             <span className="max-sm:hidden">Danger</span>
           </TabsTrigger>
@@ -113,6 +114,17 @@ const ProfilePage = async () => {
           <LoadingSuspence>
             <LinkedAccountsTab />
           </LoadingSuspence>
+        </TabsContent>
+
+        <TabsContent value="danger">
+          <Card className="border border-destructive">
+            <CardHeader>
+              <CardTitle className="text-destructive">Danger Zone</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <AccountDeletion />
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
