@@ -10,7 +10,7 @@ const SetPasswordButton = ({ email }: { email: string }) => {
       onClick={() =>
         authClient.requestPasswordReset({
           email,
-          redirectTo: "/auth/login",
+          redirectTo: "/auth/reset-password",
           fetchOptions: {
             onSuccess: () => {
               toast.success("Password reset email sent");

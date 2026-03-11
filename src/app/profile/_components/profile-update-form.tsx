@@ -44,40 +44,32 @@ const ProfileUpdateTab = ({
   const { isSubmitting } = form.formState;
 
   async function handleProfileUpdate(data: ProfileUpdateForm) {
-    const promises = [
-      authClient.updateUser({
+    if (data.name !== user.name) {
+      const updateRes = await authClient.updateUser({
         name: data.name,
-      }),
-    ];
-
-    if (data.email !== user.email) {
-      promises.push(
-        authClient.changeEmail({
-          newEmail: data.email,
-          callbackURL: "/profile",
-        }),
-      );
-    }
-
-    const res = await Promise.all(promises);
-
-    const updateUserResult = res[0];
-    const emailResult = res[1] ?? { error: false };
-
-    if (updateUserResult.error) {
-      toast.error(updateUserResult.error.message || "Failed to update profile");
-    } else if (emailResult.error) {
-      toast.error(emailResult.error.message || "Failed to change email");
-    } else {
-      if (data.email !== user.email) {
-        toast.success("Verify your new email address to complete the changes");
-      } else {
-        toast.success("Profile updated successfully");
+      });
+      if (updateRes.error) {
+        return toast.error(
+          updateRes.error.message || "Failed to update profile",
+        );
       }
     }
-
+    if (data.email !== user.email) {
+      const emailRes = await authClient.changeEmail({
+        newEmail: data.email,
+        callbackURL: "/profile",
+      });
+      if (emailRes.error) {
+        return toast.error(emailRes.error.message || "Failed to change email");
+      }
+      toast.success("Verify your new email address to complete the changes");
+      router.refresh();
+      return;
+    }
+    toast.success("Profile updated successfully");
     router.refresh();
   }
+
   return (
     <Form {...form}>
       <form
