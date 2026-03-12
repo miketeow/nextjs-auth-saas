@@ -8,6 +8,20 @@
       "when": 1770894246023,
       "tag": "0000_salty_thor",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1773223704381,
+      "tag": "0001_adorable_albert_cleary",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1773296827421,
+      "tag": "0002_lucky_the_professor",
+      "breakpoints": true
     }
   ]
 }
