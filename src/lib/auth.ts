@@ -3,7 +3,7 @@ import { env } from "@/env";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
-import { twoFactor } from "better-auth/plugins";
+import { admin, twoFactor } from "better-auth/plugins";
 
 export const auth = betterAuth({
   user: {
@@ -77,7 +77,7 @@ export const auth = betterAuth({
     },
   },
   appName: "nextjs-auth-saas",
-  plugins: [nextCookies(), twoFactor()],
+  plugins: [nextCookies(), twoFactor(), admin()],
   database: drizzleAdapter(db, {
     provider: "pg",
   }),
